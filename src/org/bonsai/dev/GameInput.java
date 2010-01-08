@@ -202,7 +202,6 @@ public class GameInput extends GameComponent implements MouseListener,
 					}
 
 					if (lastKeys.get(i + start) != keys.get(i)) {
-						System.out.println(i);
 						return false;
 					}
 				}

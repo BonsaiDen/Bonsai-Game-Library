@@ -29,7 +29,9 @@ public class GameMenu extends GameComponent implements ActionListener {
 				add("Game");
 				addCheckItem("Game", "Pause", "pause");
 				addCheckItem("Game", "Double", "scale");
+				addCheckItem("Game", "Limit FPS", "limit");
 				select("scale", game.scale() == 2);
+				select("limit", game.isLimitFPS());
 				get("Game").addSeparator();
 				addItem("Game", "Exit", "exit");
 			}
@@ -143,6 +145,9 @@ public class GameMenu extends GameComponent implements ActionListener {
 		} else if ("scale".equals(cmd)) {
 			game.setScale(game.scale() == 1 ? 2 : 1);
 
+		} else if("limit".equals(cmd)) {
+			game.setLimitFPS(!game.isLimitFPS());
+			
 		} else {
 			game.onMenu(cmd);
 		}

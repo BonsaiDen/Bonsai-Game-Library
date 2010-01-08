@@ -85,6 +85,7 @@ public class Game extends Applet {
 	private int currentFPS = 0;
 	private long fpsWait;
 	private long gameTime = 0;
+	private boolean limitFPS = true;
 
 	private boolean stopped = false;
 	private transient Thread gameLoader = null;
@@ -450,11 +451,13 @@ public class Game extends Applet {
 					// <http://blogs.sun.com/dholmes/entry/inside_the_hotspot_vm_clocks>
 					long renderTime =
 							(System.nanoTime() - renderStart) / 1000000;
-					try {
-						Thread.sleep(Math.max(0, fpsWait - renderTime));
-					} catch (InterruptedException e) {
-						Thread.interrupted();
-						break;
+					if (limitFPS) {
+						try {
+							Thread.sleep(Math.max(0, fpsWait - renderTime));
+						} catch (InterruptedException e) {
+							Thread.interrupted();
+							break;
+						}
 					}
 					renderTime = (System.nanoTime() - renderStart) / 1000000;
 					if (gameLoaded) {
@@ -594,6 +597,14 @@ public class Game extends Applet {
 
 	public boolean consoleKey() {
 		return input.keyDown(java.awt.event.KeyEvent.VK_SHIFT, true) && input.keyPressed(java.awt.event.KeyEvent.VK_F1, true);
+	}
+	
+	public final void setLimitFPS(final boolean limit) {
+		limitFPS = limit;
+	}
+	
+	public final boolean isLimitFPS() {
+		return limitFPS;
 	}
 	
 	/*

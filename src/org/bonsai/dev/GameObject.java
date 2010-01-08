@@ -27,6 +27,7 @@ public class GameObject<G extends Game> {
 	protected GameMenu menu;
 	protected GameSound sound;
 	protected GameTimer timer;
+	protected GameConsole console;
 
 	public GameObject(final G game) {
 		this.game = game;
@@ -37,6 +38,7 @@ public class GameObject<G extends Game> {
 		menu = game.menu;
 		sound = game.sound;
 		timer = game.timer;
+		console = game.console;
 	}
 
 	public final long getTime() {

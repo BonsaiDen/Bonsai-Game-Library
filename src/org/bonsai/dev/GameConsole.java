@@ -6,7 +6,6 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-
 public class GameConsole extends GameObject<Game> {
 	private BufferedImage buffer;
 	private BufferedImage[] font;
@@ -35,7 +34,7 @@ public class GameConsole extends GameObject<Game> {
 	private int cursorPos = 0;
 
 	private float transparency = 0.75f;
-	
+
 	public GameConsole(final Game game, final int width, final int height) {
 		super(game);
 		this.width = width - 8;
@@ -47,6 +46,9 @@ public class GameConsole extends GameObject<Game> {
 		timer.add("consoleRepeatStartLeft", 500);
 		timer.add("consoleRepeatRight", 35);
 		timer.add("consoleRepeatStartRight", 500);
+		print("foo");
+		print("bla");
+		print("test");
 	}
 
 	public void print(String text) {
@@ -121,11 +123,13 @@ public class GameConsole extends GameObject<Game> {
 			scrollOffset = scrollHeight - height;
 		}
 		if (submit == true) {
-			inputString = inputString.trim();
-			print(">>" + inputString);
-			onSubmit(inputString);
-			inputString = "";
-			cursorPos = 0;
+			String out = inputString.trim();
+			if (!out.equals("")) {
+				print(">>" + out);
+				onSubmit(out);
+				inputString = "";
+				cursorPos = 0;
+			}
 			submit = false;
 		}
 
@@ -145,7 +149,7 @@ public class GameConsole extends GameObject<Game> {
 
 		} else if (input.equals("pause")) {
 			game.pause(!game.paused);
-			
+
 		} else {
 			game.onConsole(input);
 		}
@@ -227,15 +231,16 @@ public class GameConsole extends GameObject<Game> {
 
 		int ox = 0;
 		int oy = 0;
-		if (y < height && y + height > 0) {
+		//System.out.println(y + height);
+
+		if (y < height && y + height > -12) {
 			for (int i = 0; i < length; i++) {
 				int c = (int) text.charAt(i);
 				if (c < 128) {
 					if (c == 13 || c == 10) {
 						oy += 12;
 						ox = 0;
-					} else if (y + oy >= 0) {
-
+					} else if (y + oy >= -12) {
 						if (c == 9) {
 							ox += 4;
 						} else {
@@ -271,16 +276,11 @@ public class GameConsole extends GameObject<Game> {
 				submit = true;
 			}
 		} else {
-			// if (key == 32 && (cursorPos == inputString.length() || cursorPos
-			// == 0)) {
-
-			// } else {
 			inputString =
 					inputString.substring(0, cursorPos) + (char) key
 							+ inputString.substring(cursorPos);
 
 			cursorPos += 1;
-			// }
 		}
 		cursor = true;
 		changed = true;
