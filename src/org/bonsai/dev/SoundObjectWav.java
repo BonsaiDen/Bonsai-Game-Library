@@ -45,7 +45,7 @@ public class SoundObjectWav extends SoundObject {
 				e.printStackTrace();
 			}
 		}
-		InputStream stream = new ByteArrayInputStream(bytes.clone());
+		InputStream stream = new ByteArrayInputStream(bytes);
 		try {
 			audioInputStream = AudioSystem.getAudioInputStream(stream);
 			stream.close();

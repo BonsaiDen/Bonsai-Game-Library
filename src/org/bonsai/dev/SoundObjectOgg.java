@@ -132,7 +132,7 @@ public class SoundObjectOgg extends SoundObject {
 				e.printStackTrace();
 			}
 		}
-		bitStream = new ByteArrayInputStream(dataBytes.clone());
+		bitStream = new ByteArrayInputStream(dataBytes);
 	}
 
 	@Override

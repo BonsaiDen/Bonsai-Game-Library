@@ -42,7 +42,7 @@ public class SoundObjectXm extends SoundObject {
 		ibxm = new IBXM(22050);
 
 		// Create Stream
-		InputStream stream = new ByteArrayInputStream(bytes.clone());
+		InputStream stream = new ByteArrayInputStream(bytes);
 		DataInputStream data_input_stream = new DataInputStream(stream);
 		byte[] xm_header = new byte[60];
 		try {

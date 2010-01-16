@@ -5,13 +5,18 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
-public class GameConsole extends GameObject<Game> {
+public class GameConsole extends GameComponent {
 	private BufferedImage buffer;
 	private BufferedImage[] font;
 	private int maxLines = 128;
 	private String[] lines = new String[maxLines];
 	private String inputString = "";
+	private List<String> history = new ArrayList<String>(); 
+	private int historyPointer = -1;
+	private String savedInput = "";
 
 	private int lineMax = 0;
 	private int height = 0;
@@ -35,20 +40,27 @@ public class GameConsole extends GameObject<Game> {
 
 	private float transparency = 0.75f;
 
-	public GameConsole(final Game game, final int width, final int height) {
+	public GameConsole(final Game game) {
 		super(game);
-		this.width = width - 8;
-		this.height = height;
-		buffer = image.create(width, height, false);
-		font = image.gets("/images/console.png", 32, 4);
-		timer.add("consoleCursor", 250);
-		timer.add("consoleRepeatLeft", 35);
-		timer.add("consoleRepeatStartLeft", 500);
-		timer.add("consoleRepeatRight", 35);
-		timer.add("consoleRepeatStartRight", 500);
-		print("foo");
-		print("bla");
-		print("test");
+		size(false);
+		font = game.image.gets("/images/console.png", 32, 4);
+		game.timer.add("consoleCursor", 250);
+		game.timer.add("consoleRepeatLeft", 35);
+		game.timer.add("consoleRepeatStartLeft", 500);
+		game.timer.add("consoleRepeatRight", 35);
+		game.timer.add("consoleRepeatStartRight", 500);
+	}
+
+	
+	private final void size(final boolean max) {
+		if (max) {
+			this.height = game.height();
+		} else {
+			this.height = game.height() / 4;
+		}
+
+		this.width = game.width() - 8;
+		buffer = game.image.create(game.width(), height, false);
 	}
 
 	public void print(String text) {
@@ -68,50 +80,80 @@ public class GameConsole extends GameObject<Game> {
 		changed = true;
 	}
 
-	public void control() {
+	public final void control() {
 		// Cursor
-		if (!input.keyDown(java.awt.event.KeyEvent.VK_LEFT, true)) {
-			timer.set("consoleRepeatStartLeft");
+		if (!game.input.keyDown(java.awt.event.KeyEvent.VK_LEFT, true)) {
+			game.timer.set("consoleRepeatStartLeft");
 		}
-		if (input.keyPressed(java.awt.event.KeyEvent.VK_LEFT, true)
-				|| (input.keyDown(java.awt.event.KeyEvent.VK_LEFT, true)
-						&& timer.expired("consoleRepeatStartLeft") && timer.expired("consoleRepeatLeft"))) {
+		if (game.input.keyPressed(java.awt.event.KeyEvent.VK_LEFT, true)
+				|| (game.input.keyDown(java.awt.event.KeyEvent.VK_LEFT, true)
+						&& game.timer.expired("consoleRepeatStartLeft") && game.timer.expired("consoleRepeatLeft"))) {
 			cursorPos -= 1;
 			if (cursorPos < 0) {
 				cursorPos = 0;
 			}
 			moveCursor = true;
 			changed = true;
-			timer.set("consoleRepeatLeft");
+			game.timer.set("consoleRepeatLeft");
 
 		}
 
-		if (!input.keyDown(java.awt.event.KeyEvent.VK_RIGHT, true)) {
-			timer.set("consoleRepeatStartRight");
+		if (!game.input.keyDown(java.awt.event.KeyEvent.VK_RIGHT, true)) {
+			game.timer.set("consoleRepeatStartRight");
 		}
-		if (input.keyPressed(java.awt.event.KeyEvent.VK_RIGHT, true)
-				|| (input.keyDown(java.awt.event.KeyEvent.VK_RIGHT, true)
-						&& timer.expired("consoleRepeatStartRight") && timer.expired("consoleRepeatRight"))) {
+		if (game.input.keyPressed(java.awt.event.KeyEvent.VK_RIGHT, true)
+				|| (game.input.keyDown(java.awt.event.KeyEvent.VK_RIGHT, true)
+						&& game.timer.expired("consoleRepeatStartRight") && game.timer.expired("consoleRepeatRight"))) {
 			cursorPos += 1;
 			if (cursorPos > inputString.length()) {
 				cursorPos = inputString.length();
 			}
 			moveCursor = true;
 			changed = true;
-			timer.set("consoleRepeatRight");
+			game.timer.set("consoleRepeatRight");
 		}
 
-		if (!input.keyDown(java.awt.event.KeyEvent.VK_LEFT, true)
-				&& !input.keyDown(java.awt.event.KeyEvent.VK_RIGHT, true)) {
+		if (!game.input.keyDown(java.awt.event.KeyEvent.VK_LEFT, true)
+				&& !game.input.keyDown(java.awt.event.KeyEvent.VK_RIGHT, true)) {
 			moveCursor = false;
 		}
 
+		
+		// History
+		if (game.input.keyPressed(java.awt.event.KeyEvent.VK_UP, true)) {
+			if (historyPointer == -1) {
+				savedInput = inputString;
+			}
+			if (historyPointer < history.size() - 1) {
+				historyPointer += 1;
+			}
+			inputString = history.get(history.size() - 1 - historyPointer);
+			cursorPos = inputString.length();
+			changed = true;
+		}
+		if (game.input.keyPressed(java.awt.event.KeyEvent.VK_DOWN, true)) {
+			if (historyPointer == -1) {
+				savedInput = inputString;
+			}
+			if (historyPointer > -1) {
+				historyPointer -= 1;
+			}
+			if (historyPointer == -1) {
+				inputString = savedInput;
+				cursorPos = inputString.length();
+			} else {
+				inputString = history.get(history.size() - 1 - historyPointer);
+				cursorPos = inputString.length();
+			}
+			changed = true;
+		}
+		
 		// Scrolling
-		if (input.keyDown(java.awt.event.KeyEvent.VK_PAGE_UP, true)) {
+		if (game.input.keyDown(java.awt.event.KeyEvent.VK_PAGE_UP, true)) {
 			scrollOffset += 12;
 			changed = true;
 		}
-		if (input.keyDown(java.awt.event.KeyEvent.VK_PAGE_DOWN, true)) {
+		if (game.input.keyDown(java.awt.event.KeyEvent.VK_PAGE_DOWN, true)) {
 			scrollOffset -= 12;
 			changed = true;
 		}
@@ -125,6 +167,8 @@ public class GameConsole extends GameObject<Game> {
 		if (submit == true) {
 			String out = inputString.trim();
 			if (!out.equals("")) {
+				history.add(out);
+				historyPointer = -1;
 				print(">>" + out);
 				onSubmit(out);
 				inputString = "";
@@ -133,13 +177,13 @@ public class GameConsole extends GameObject<Game> {
 			submit = false;
 		}
 
-		if (timer.expired("consoleCursor")) {
+		if (game.timer.expired("consoleCursor")) {
 			cursor = !cursor;
-			timer.set("consoleCursor");
+			game.timer.set("consoleCursor");
 		}
 	}
 
-	public void onSubmit(String input) {
+	public final void onSubmit(String input) {
 		if (input.equals("clear") || input.equals("cls")) {
 			scrollOffset = 0;
 			lineMax = 0;
@@ -150,12 +194,15 @@ public class GameConsole extends GameObject<Game> {
 		} else if (input.equals("pause")) {
 			game.pause(!game.paused);
 
+		} else if (input.equals("full")) {
+			size(true);
+
 		} else {
 			game.onConsole(input);
 		}
 	}
 
-	public void draw(Graphics2D g, int x, int y) {
+	public final void draw(Graphics2D g, int x, int y) {
 		// Draw
 		Graphics2D bg = (Graphics2D) buffer.getGraphics();
 		String drawInputString =
@@ -216,24 +263,21 @@ public class GameConsole extends GameObject<Game> {
 		g.setComposite(tmp);
 	}
 
-	public int textHeight(String text) {
-		String empty = text.replace("\n", "").replace("\n", "");
-		int lineheight = ((empty.length() - 1) / (width / 8)) * 12 + 12;
-		int lines = text.length() - empty.length();
-		lineheight += lines * 12;
-		return lineheight;
+	private final int textHeight(final String text) {
+		final String empty = text.replace("\n", "").replace("\n", "");
+		final int lineheight = ((empty.length() - 1) / (width / 8)) * 12 + 12;
+		final int lines = text.length() - empty.length();
+		return lineheight + lines * 12;
 	}
 
-	public int drawText(Graphics2D g, int x, int y, String text,
-			boolean drawCursor) {
-		int length = text.length();
-		int lineheight = textHeight(text);
-
-		int ox = 0;
-		int oy = 0;
-		//System.out.println(y + height);
+	private final int drawText(final Graphics2D g, final int x, final int y,
+			final String text, final boolean drawCursor) {
+		final int length = text.length();
+		final int lineheight = textHeight(text);
 
 		if (y < height && y + height > -12) {
+			int ox = 0;
+			int oy = 0;
 			for (int i = 0; i < length; i++) {
 				int c = (int) text.charAt(i);
 				if (c < 128) {
@@ -254,7 +298,7 @@ public class GameConsole extends GameObject<Game> {
 
 					ox += 1;
 					if (ox * 8 >= width) {
-						y += 12;
+						oy += 12;
 						ox = 0;
 					}
 				}
@@ -263,7 +307,7 @@ public class GameConsole extends GameObject<Game> {
 		return lineheight;
 	}
 
-	public synchronized void onKey(int key) {
+	public final synchronized void onKey(final int key) {
 		if (key == 8) {
 			if (!inputString.equals("")) {
 				inputString =

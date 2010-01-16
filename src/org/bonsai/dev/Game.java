@@ -86,6 +86,7 @@ public class Game extends Applet {
 	private long fpsWait;
 	private long gameTime = 0;
 	private boolean limitFPS = true;
+	private int maxFPS = 0;
 
 	private boolean stopped = false;
 	private transient Thread gameLoader = null;
@@ -152,7 +153,7 @@ public class Game extends Applet {
 	 */
 	public final void frame(final String title, final int sizex,
 			final int sizey, final boolean scaled, final boolean initMenu,
-			final boolean gameMenu, final boolean gameConsole) {
+			final boolean gameMenu) {
 
 		// Size
 		if (scaled) {
@@ -173,14 +174,10 @@ public class Game extends Applet {
 		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		frame.setVisible(true);
 
-		
 		// Engine
 		resizeFrame();
 		initEngine(frame);
-		if (gameConsole) {
-			console = new GameConsole(this, width(), height() / 4);
-		}
-
+		
 		initThreads();
 		canvas.requestFocus();
 	}
@@ -224,7 +221,7 @@ public class Game extends Applet {
 
 	public static void main(final String args[]) {
 		new Game().frame("Bonsai Game Library 1.00", 320, 240, false, true,
-				true, true);
+				true);
 	}
 
 	/*
@@ -307,6 +304,7 @@ public class Game extends Applet {
 		input = new GameInput(this);
 		font = new GameFont(this);
 		timer = new GameTimer(this);
+		
 
 		// Canvas
 		canvas = new Canvas(config);
@@ -326,7 +324,9 @@ public class Game extends Applet {
 		do {
 			strategy = canvas.getBufferStrategy();
 		} while (strategy == null);
-
+		
+		// Init console here, otherwise the menu gets overlayed by the canvas
+		console = new GameConsole(this);
 	}
 
 	private void initThreads() {
@@ -386,8 +386,9 @@ public class Game extends Applet {
 		public void run() {
 			setName("Bonsai-GameLoop");
 			initGame(false);
-			int fpsCount = 0;
-			long fpsTime = 0;
+			int fpsRealCount = 0;
+			long fpsRealTime = 0;
+			long fpsMaxTime = 0;
 
 			backgroundGraphics = (Graphics2D) background.getGraphics();
 
@@ -459,18 +460,25 @@ public class Game extends Applet {
 							break;
 						}
 					}
-					renderTime = (System.nanoTime() - renderStart) / 1000000;
+					long allRenderTime = (System.nanoTime() - renderStart) / 1000000;
 					if (gameLoaded) {
-						gameTime += renderTime;
+						gameTime += allRenderTime;
 					}
-					fpsTime += (System.nanoTime() - renderStart) / 1000000;
-					fpsCount += 1;
-					if (fpsTime > 1000 - fpsWait) {
-						currentFPS = fpsCount;
-						fpsCount = 0;
-						fpsTime = 0;
+					
+					// Real FPS
+					fpsRealTime += (System.nanoTime() - renderStart) / 1000000;
+					fpsRealCount += 1;
+					fpsMaxTime += (int) (1000.0 / Math.max(1, renderTime));
+					if (fpsRealTime > 1000 - fpsWait) {
+						currentFPS = fpsRealCount;
+						if (fpsRealCount > 0) {
+							maxFPS = (int) (fpsMaxTime / fpsRealCount);
+						}
+						fpsMaxTime = 0;
+						fpsRealCount = 0;
+						fpsRealTime = 0;
 					}
-
+					
 				} else {
 					try {
 						Thread.sleep(100);
@@ -479,7 +487,6 @@ public class Game extends Applet {
 						break;
 					}
 				}
-
 			}
 
 			// Clean up
@@ -557,9 +564,13 @@ public class Game extends Applet {
 		return currentFPS;
 	}
 
+	public final int getMaxFPS() {
+		return maxFPS;
+	}
+	
 	public final void pause(final boolean mode) {
 		paused = mode;
-		menu.getItem("pause").setSelected(paused);
+		menu.select("pause", paused);
 		sound.pauseAll(paused);
 	}
 
@@ -601,6 +612,7 @@ public class Game extends Applet {
 	
 	public final void setLimitFPS(final boolean limit) {
 		limitFPS = limit;
+		menu.select("limit", limit);
 	}
 	
 	public final boolean isLimitFPS() {
