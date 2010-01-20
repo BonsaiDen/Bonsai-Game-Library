@@ -386,15 +386,16 @@ public class Game extends Applet {
 		public void run() {
 			setName("Bonsai-GameLoop");
 			initGame(false);
-			int fpsRealCount = 0;
-			long fpsRealTime = 0;
-			long fpsMaxTime = 0;
-
+			
+			// FPS
+			long renderStart = System.nanoTime();
+			final long[] renderStats = new long[10];
+			final long[] renderStatsMax = new long[10];
+			
+			// Graphics
 			backgroundGraphics = (Graphics2D) background.getGraphics();
-
 			main: while (true) {
 				// Pausing
-				long renderStart = System.nanoTime();
 				if (!consoleOpen && input.keyPressed(java.awt.event.KeyEvent.VK_P, true)) {
 					pause(!paused);
 				}
@@ -465,19 +466,21 @@ public class Game extends Applet {
 						gameTime += allRenderTime;
 					}
 					
-					// Real FPS
-					fpsRealTime += (System.nanoTime() - renderStart) / 1000000;
-					fpsRealCount += 1;
-					fpsMaxTime += (int) (1000.0 / Math.max(1, renderTime));
-					if (fpsRealTime > 1000 - fpsWait) {
-						currentFPS = fpsRealCount;
-						if (fpsRealCount > 0) {
-							maxFPS = (int) (fpsMaxTime / fpsRealCount);
+					// FPS
+					final int frame = (int) (System.nanoTime() % 10);
+					renderStats[frame] = allRenderTime;
+					renderStatsMax[frame] = renderTime;
+					if (frame == 9) {
+						int time = 1;
+						int max = 1;
+						for(int i = 0; i < 10; i++) {
+							time += renderStats[i];
+							max += renderStatsMax[i];
 						}
-						fpsMaxTime = 0;
-						fpsRealCount = 0;
-						fpsRealTime = 0;
+						currentFPS = (int)10000 / time;
+						maxFPS = (int)10000 / max;
 					}
+					renderStart = System.nanoTime();
 					
 				} else {
 					try {

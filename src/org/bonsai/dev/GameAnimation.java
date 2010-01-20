@@ -18,22 +18,22 @@
 
 package org.bonsai.dev;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class GameAnimation extends GameComponent {
-	private Map<String, Animation> animations = new HashMap<String, Animation>();
-	private List<Animation> animationList = new LinkedList<Animation>();
+	private final Map<String, Animation> animations = new HashMap<String, Animation>();
+	private final List<Animation> animationList = new ArrayList<Animation>();
 
 	public GameAnimation(final Game game) {
 		super(game);
 	}
 
 	public final void update() {
-		for (Animation animation : animationList) {
-			animation.update();
+		for(int i = 0; i < animationList.size(); i++) {
+			animationList.get(i).update();
 		}
 	}
 
@@ -88,8 +88,8 @@ public class GameAnimation extends GameComponent {
 				lastTime = getTime();
 
 			} else if (getTime() > lastTime + frameTime) {
-				long delta = getTime() - lastTime;
-				int frameCount = (int) (delta / frameTime);
+				final long delta = getTime() - lastTime;
+				final int frameCount = (int) (delta / frameTime);
 				pos += frameCount;
 				if (!loop) {
 					if (pos > frames.length - 1) {
