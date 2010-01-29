@@ -26,7 +26,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
-
 import javax.imageio.ImageIO;
 
 public class GameImage extends GameComponent {
@@ -35,11 +34,11 @@ public class GameImage extends GameComponent {
 	}
 
 	public final BufferedImage getScreen() {
-		int width = game.width();
-		int height = game.height();
-		int scale = game.scale();
-		BufferedImage buffer = create(width * scale, height * scale);
-		Graphics2D g = (Graphics2D) buffer.getGraphics();
+		final int width = game.width();
+		final int height = game.height();
+		final int scale = game.scale();
+		final BufferedImage buffer = create(width * scale, height * scale);
+		final Graphics2D g = (Graphics2D) buffer.getGraphics();
 		if (scale != 1) {
 			g.drawImage(game.getBackbuffer(), 0, 0, width * scale, height
 					* scale, 0, 0, width, height, null);
@@ -65,7 +64,7 @@ public class GameImage extends GameComponent {
 	}
 
 	public final BufferedImage get(final String file) {
-		URL filename = getURL(file);
+		final URL filename = getURL(file);
 		if (filename == null) {
 			return null;
 		} else {
@@ -78,22 +77,22 @@ public class GameImage extends GameComponent {
 	}
 
 	private final BufferedImage compatible(BufferedImage image) {
-		GraphicsConfiguration config = game.getConfig();
+		final GraphicsConfiguration config = game.getConfig();
 		if (image.getColorModel().equals(config.getColorModel())) {
 			return image;
 
 		} else {
-			BufferedImage newImage = config.createCompatibleImage(image
-					.getWidth(), image.getHeight(), image.getColorModel()
-					.getTransparency());
-			
+			BufferedImage newImage = config.createCompatibleImage(
+					image.getWidth(), image.getHeight(), image.getColorModel()
+							.getTransparency());
+
 			Graphics2D g = (Graphics2D) newImage.getGraphics();
 			g.drawImage(image, 0, 0, null);
 			g.dispose();
 			return newImage;
 		}
 	}
-	
+
 	public final BufferedImage[] gets(final String filename, final int cols,
 			final int rows) {
 		BufferedImage image = get(filename);
@@ -103,17 +102,17 @@ public class GameImage extends GameComponent {
 		return gets(image, cols, rows);
 	}
 
-	public final BufferedImage[] gets(final BufferedImage image, final int cols,
-			final int rows) {
+	public final BufferedImage[] gets(final BufferedImage image,
+			final int cols, final int rows) {
 		BufferedImage[] buffer = new BufferedImage[cols * rows];
-		int width = image.getWidth() / cols;
-		int height = image.getHeight() / rows;
+		final int width = image.getWidth() / cols;
+		final int height = image.getHeight() / rows;
 		int i = 0;
 		for (int y = 0; y < rows; y++) {
 			for (int x = 0; x < cols; x++) {
 				buffer[i] = game.getConfig().createCompatibleImage(width,
 						height, image.getColorModel().getTransparency());
-				Graphics2D g = buffer[i].createGraphics();
+				final Graphics2D g = buffer[i].createGraphics();
 				g.drawImage(image, 0, 0, width, height, x * width, y * height,
 						(x + 1) * width, (y + 1) * height, null);
 				g.dispose();
@@ -125,11 +124,11 @@ public class GameImage extends GameComponent {
 
 	public final BufferedImage flip(final BufferedImage image, final boolean h,
 			final boolean v) {
-		BufferedImage buffer = game.getConfig().createCompatibleImage(
+		final BufferedImage buffer = game.getConfig().createCompatibleImage(
 				image.getWidth(), image.getHeight(),
 				image.getColorModel().getTransparency());
 
-		Graphics2D g = buffer.createGraphics();
+		final Graphics2D g = buffer.createGraphics();
 		g.drawImage(image, h ? image.getWidth() : 0, v ? image.getHeight() : 0,
 				h ? 0 : image.getWidth(), v ? 0 : image.getHeight(), 0, 0,
 				image.getWidth(), image.getHeight(), null);
@@ -140,7 +139,7 @@ public class GameImage extends GameComponent {
 
 	public final BufferedImage[] flips(final BufferedImage[] images,
 			final boolean h, final boolean v) {
-		BufferedImage[] buffer = new BufferedImage[images.length];
+		final BufferedImage[] buffer = new BufferedImage[images.length];
 		for (int i = 0; i < images.length; i++) {
 			buffer[i] = flip(images[i], h, v);
 		}
