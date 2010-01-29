@@ -32,7 +32,7 @@ public class GameAnimation extends GameComponent {
 	}
 
 	public final void update() {
-		for(int i = 0; i < animationList.size(); i++) {
+		for (int i = 0; i < animationList.size(); i++) {
 			animationList.get(i).update();
 		}
 	}
