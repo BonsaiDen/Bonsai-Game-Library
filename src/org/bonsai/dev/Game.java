@@ -24,6 +24,7 @@
 package org.bonsai.dev;
 
 import java.applet.Applet;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -160,6 +161,7 @@ public class Game extends Applet {
 
 		// Create frame
 		frame = new JFrame(config);
+		frame.setLayout(new BorderLayout(0,0));
 		frame.setResizable(false);
 		frame.setTitle(title);
 		menu = new GameMenu(this, initMenu, gameMenu);
@@ -229,7 +231,7 @@ public class Game extends Applet {
 			scale = getParameter("scaled") != null ? 2 : 1;
 			width = getWidth() / scale;
 			height = getHeight() / scale;
-			setLayout(null);
+			setLayout(new BorderLayout(0,0));
 			this.menu = new GameMenu(this, false, false);
 			initEngine(this);
 			applet = this;
