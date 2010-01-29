@@ -10,6 +10,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
 public class GameMenu extends GameComponent implements ActionListener {
@@ -23,6 +24,7 @@ public class GameMenu extends GameComponent implements ActionListener {
 		super(game);
 		if (init) {
 			active = true;
+			JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 			menuBar = new JMenuBar();
 			game.getFrame().setJMenuBar(menuBar);
 			if (gameMenu) {
@@ -145,9 +147,9 @@ public class GameMenu extends GameComponent implements ActionListener {
 		} else if ("scale".equals(cmd)) {
 			game.setScale(game.scale() == 1 ? 2 : 1);
 
-		} else if("limit".equals(cmd)) {
+		} else if ("limit".equals(cmd)) {
 			game.setLimitFPS(!game.isLimitFPS());
-			
+
 		} else {
 			game.onMenu(cmd);
 		}
