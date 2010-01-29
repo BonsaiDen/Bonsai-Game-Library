@@ -14,7 +14,7 @@ public class GameConsole extends GameComponent {
 	private int maxLines = 128;
 	private String[] lines = new String[maxLines];
 	private String inputString = "";
-	private List<String> history = new ArrayList<String>(); 
+	private List<String> history = new ArrayList<String>();
 	private int historyPointer = -1;
 	private String savedInput = "";
 
@@ -39,11 +39,12 @@ public class GameConsole extends GameComponent {
 	private int cursorPos = 0;
 
 	private float transparency = 0.75f;
+	
+	private boolean initiated = false;
 
 	public GameConsole(final Game game) {
 		super(game);
-		size(false);
-		font = game.image.gets("/images/console.png", 32, 4);
+		size(false);	
 		game.timer.add("consoleCursor", 250);
 		game.timer.add("consoleRepeatLeft", 35);
 		game.timer.add("consoleRepeatStartLeft", 500);
@@ -51,7 +52,6 @@ public class GameConsole extends GameComponent {
 		game.timer.add("consoleRepeatStartRight", 500);
 	}
 
-	
 	private final void size(final boolean max) {
 		if (max) {
 			this.height = game.height();
@@ -60,7 +60,6 @@ public class GameConsole extends GameComponent {
 		}
 
 		this.width = game.width() - 8;
-		buffer = game.image.create(game.width(), height, false);
 	}
 
 	public void print(String text) {
@@ -118,7 +117,6 @@ public class GameConsole extends GameComponent {
 			moveCursor = false;
 		}
 
-		
 		// History
 		if (game.input.keyPressed(java.awt.event.KeyEvent.VK_UP, true)) {
 			if (historyPointer == -1) {
@@ -147,7 +145,7 @@ public class GameConsole extends GameComponent {
 			}
 			changed = true;
 		}
-		
+
 		// Scrolling
 		if (game.input.keyDown(java.awt.event.KeyEvent.VK_PAGE_UP, true)) {
 			scrollOffset += 12;
@@ -203,10 +201,16 @@ public class GameConsole extends GameComponent {
 	}
 
 	public final void draw(Graphics2D g, int x, int y) {
+		if (!initiated) {
+			font = game.image.gets("/images/console.png", 32, 4);
+			buffer = game.image.create(game.width(), height, false);
+			initiated = true;
+		}
+		
 		// Draw
 		Graphics2D bg = (Graphics2D) buffer.getGraphics();
-		String drawInputString =
-				inputString + (cursorPos == inputString.length() ? " " : "");
+		String drawInputString = inputString
+				+ (cursorPos == inputString.length() ? " " : "");
 		int inputHeight = textHeight(drawInputString) + 2;
 		if (changed || scrollOffsetOld != scrollOffset
 				|| scrollHeightOld != scrollHeight) {
@@ -220,9 +224,8 @@ public class GameConsole extends GameComponent {
 			int oy = 0;
 			for (int i = 0; i < lineMax; i++) {
 				// if (i < lineMax) {
-				oy +=
-						drawText(bg, 0, oy - scroll + scrollOffset, lines[i],
-								false);
+				oy += drawText(bg, 0, oy - scroll + scrollOffset, lines[i],
+						false);
 				if (oy - scroll > height - inputHeight) {
 					int dec = (oy - scroll) - (height - inputHeight);
 					scroll += dec;
@@ -310,9 +313,8 @@ public class GameConsole extends GameComponent {
 	public final synchronized void onKey(final int key) {
 		if (key == 8) {
 			if (!inputString.equals("")) {
-				inputString =
-						inputString.substring(0, cursorPos - 1)
-								+ inputString.substring(cursorPos);
+				inputString = inputString.substring(0, cursorPos - 1)
+						+ inputString.substring(cursorPos);
 				cursorPos -= 1;
 			}
 		} else if (key == 10) {
@@ -320,9 +322,8 @@ public class GameConsole extends GameComponent {
 				submit = true;
 			}
 		} else {
-			inputString =
-					inputString.substring(0, cursorPos) + (char) key
-							+ inputString.substring(cursorPos);
+			inputString = inputString.substring(0, cursorPos) + (char) key
+					+ inputString.substring(cursorPos);
 
 			cursorPos += 1;
 		}
