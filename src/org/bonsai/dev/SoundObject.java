@@ -34,7 +34,7 @@ public abstract class SoundObject extends Thread {
 	public AudioInputStream audioInputStream = null;
 
 	public abstract String getTypeName();
-	
+
 	public abstract void initSound(final byte[] bytes);
 
 	public abstract void startSound();

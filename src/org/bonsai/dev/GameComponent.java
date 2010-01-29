@@ -24,7 +24,7 @@ public class GameComponent {
 	public GameComponent(final Game game) {
 		this.game = game;
 	}
-	
+
 	public final long getTime() {
 		return game.getTime();
 	}
