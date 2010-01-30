@@ -149,7 +149,7 @@ public class Game extends Applet {
 	public final void frame(final String title, final int sizex,
 			final int sizey, final boolean scaled, final boolean initMenu,
 			final boolean gameMenu) {
-
+		
 		// Size
 		if (scaled) {
 			scale = 2;
@@ -162,17 +162,20 @@ public class Game extends Applet {
 		// Create frame
 		frame = new JFrame(config);
 		frame.setLayout(new BorderLayout(0,0));
+		
+		// Init Engine
+		initEngine(frame);
+		
+		// Setup frame
 		frame.setResizable(false);
 		frame.setTitle(title);
 		menu = new GameMenu(this, initMenu, gameMenu);
 		frame.addWindowListener(new FrameClose());
-		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		frame.setVisible(true);
-
-		// Engine
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);	
+		frame.setVisible(true);	
 		resizeFrame();
-		initEngine(frame);
-
+		
+		// Start threads
 		initThreads();
 		canvasPanel.requestFocus();
 	}
@@ -232,8 +235,8 @@ public class Game extends Applet {
 			width = getWidth() / scale;
 			height = getHeight() / scale;
 			setLayout(new BorderLayout(0,0));
-			this.menu = new GameMenu(this, false, false);
 			initEngine(this);
+			this.menu = new GameMenu(this, false, false);
 			applet = this;
 			initThreads();
 			stopped = false;
@@ -281,8 +284,11 @@ public class Game extends Applet {
 	 * Gameloader --------------------------------------------------------------
 	 */
 	private void initEngine(final Container parent) {
-		setFPS(30);
-
+		// Canvas
+		canvasPanel = new JPanel(false);
+		canvasPanel.setPreferredSize(new Dimension(width * scale, height * scale));
+		parent.add(canvasPanel, 0);
+				
 		// Components
 		animation = new GameAnimation(this);
 		sound = new GameSound(this);
@@ -291,12 +297,6 @@ public class Game extends Applet {
 		font = new GameFont(this);
 		timer = new GameTimer(this);
 		console = new GameConsole(this);
-		
-		// Canvas
-		canvasPanel = new JPanel();
-		canvasPanel.setPreferredSize(new Dimension(width * scale, height * scale));
-		canvasPanel.setDoubleBuffered(true);
-		parent.add(canvasPanel, 0);
 
 		// Add input listeners
 		canvasPanel.addMouseListener(input);
@@ -304,9 +304,10 @@ public class Game extends Applet {
 		canvasPanel.addKeyListener(input);
 		canvasPanel.addFocusListener(input);
 		canvasPanel.setIgnoreRepaint(true);
-
+		
 		// Create the buffer strategy
 		background = image.create(width, height, false);
+		setFPS(30);
 	}
 
 	private void initThreads() {
