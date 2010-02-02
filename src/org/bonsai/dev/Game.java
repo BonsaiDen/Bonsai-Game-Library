@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
@@ -65,6 +66,7 @@ public class Game extends Applet {
 	private JPanel canvasPanel;
 	private BufferedImage background;
 	private Graphics2D backgroundGraphics;
+	protected Color backgroundColor = Color.BLACK;
 	private int width;
 	private int height;
 	private int scale;
@@ -149,32 +151,28 @@ public class Game extends Applet {
 	public final void frame(final String title, final int sizex,
 			final int sizey, final boolean scaled, final boolean initMenu,
 			final boolean gameMenu) {
-		
+
 		// Size
-		if (scaled) {
-			scale = 2;
-		} else {
-			scale = 1;
-		}
+		scale = scaled ? 2 : 1;
 		width = sizex;
 		height = sizey;
 
 		// Create frame
 		frame = new JFrame(config);
-		frame.setLayout(new BorderLayout(0,0));
-		
+		frame.setLayout(new BorderLayout(0, 0));
+
 		// Init Engine
 		initEngine(frame);
-		
+
 		// Setup frame
 		frame.setResizable(false);
 		frame.setTitle(title);
 		menu = new GameMenu(this, initMenu, gameMenu);
 		frame.addWindowListener(new FrameClose());
-		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);	
-		frame.setVisible(true);	
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		frame.setVisible(true);
 		resizeFrame();
-		
+
 		// Start threads
 		initThreads();
 		canvasPanel.requestFocus();
@@ -199,7 +197,6 @@ public class Game extends Applet {
 	}
 
 	public void onConsole(final String consoleInput) {
-
 	}
 
 	private class FrameClose extends WindowAdapter {
@@ -234,7 +231,8 @@ public class Game extends Applet {
 			scale = getParameter("scaled") != null ? 2 : 1;
 			width = getWidth() / scale;
 			height = getHeight() / scale;
-			setLayout(new BorderLayout(0,0));
+			initApplet(this);
+			setLayout(new BorderLayout(0, 0));
 			initEngine(this);
 			this.menu = new GameMenu(this, false, false);
 			applet = this;
@@ -244,6 +242,15 @@ public class Game extends Applet {
 		canvasPanel.requestFocus();
 	}
 
+	@Override
+	public void paint(Graphics g) {
+		if (!gameLoaded) {
+			g.setColor(backgroundColor);
+			g.fillRect(0, 0, width() * scale, height() * scale);
+			g.dispose();
+		}
+	}
+	
 	@Override
 	public final void stop() {
 		stopped = true;
@@ -275,7 +282,8 @@ public class Game extends Applet {
 	}
 
 	public final synchronized void setScale(final int scale) {
-		canvasPanel.setPreferredSize(new Dimension(width * scale, height * scale));
+		canvasPanel.setPreferredSize(new Dimension(width * scale, height
+				* scale));
 		this.scale = scale;
 		resizeFrame();
 	}
@@ -284,11 +292,14 @@ public class Game extends Applet {
 	 * Gameloader --------------------------------------------------------------
 	 */
 	private void initEngine(final Container parent) {
-		// Canvas
+		// we don't need double buffering here since we're already blitting all
+		// stuff to our own buffer for scaling before actually updating the 
+		// screen.
 		canvasPanel = new JPanel(false);
-		canvasPanel.setPreferredSize(new Dimension(width * scale, height * scale));
+		canvasPanel.setPreferredSize(new Dimension(width * scale, height
+			* scale));
 		parent.add(canvasPanel, 0);
-				
+
 		// Components
 		animation = new GameAnimation(this);
 		sound = new GameSound(this);
@@ -304,8 +315,9 @@ public class Game extends Applet {
 		canvasPanel.addKeyListener(input);
 		canvasPanel.addFocusListener(input);
 		canvasPanel.setIgnoreRepaint(true);
-		
-		// Create the buffer strategy
+
+		// Our background for scaling which also acts as a replacement for
+		// double buffering
 		background = image.create(width, height, false);
 		setFPS(30);
 	}
@@ -347,8 +359,10 @@ public class Game extends Applet {
 	public void initGame(final boolean loaded) {
 	}
 
+	public void initApplet(final Applet applet) {
+	}
+	
 	public void updateGame(final boolean loaded) {
-
 	}
 
 	public void renderGame(final boolean loaded, final Graphics2D g) {
@@ -431,7 +445,8 @@ public class Game extends Applet {
 					long renderTime = (System.nanoTime() - renderStart) / 10000;
 					if (limitFPS) {
 						try {
-							Thread.sleep(Math.max(0, fpsWait - (renderTime / 100)));
+							Thread.sleep(Math.max(0, fpsWait
+									- (renderTime / 100)));
 						} catch (InterruptedException e) {
 							Thread.interrupted();
 							break;
@@ -442,7 +457,7 @@ public class Game extends Applet {
 						gameTime += allRenderTime / 100;
 					}
 
-					// FPS
+					// Average FPS over 10 frames
 					final int frame = (int) (System.nanoTime() % 10);
 					renderStats[frame] = allRenderTime;
 					renderStatsMax[frame] = renderTime;
@@ -460,7 +475,7 @@ public class Game extends Applet {
 
 				} else {
 					try {
-						Thread.sleep(100);
+						Thread.sleep(25);
 					} catch (InterruptedException e) {
 						Thread.interrupted();
 						break;
