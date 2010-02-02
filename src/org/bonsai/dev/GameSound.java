@@ -35,7 +35,6 @@ public class GameSound extends GameComponent {
 
 	public GameSound(final Game game) {
 		super(game);
-		addType("wav", SoundObjectWav.class);
 	}
 
 	public void addType(final String ext,
