@@ -55,9 +55,9 @@ public class GameSound extends GameComponent {
 		}
 
 		try {
-			InputStream stream = this.getClass().getResourceAsStream(filename);
-			int size = stream.available();
-			byte[] bytes = new byte[size];
+			final InputStream stream = this.getClass().getResourceAsStream(filename);
+			final int size = stream.available();
+			final byte[] bytes = new byte[size];
 			int offset = 0;
 			int numRead;
 			while (offset < bytes.length
@@ -143,9 +143,8 @@ public class GameSound extends GameComponent {
 				soundsStatus.get(id).status = 2;
 			}
 			soundsStatus.put(id, null);
-			SoundObject snd;
 			try {
-				snd = soundTypes.get(id).newInstance();
+				final SoundObject snd = soundTypes.get(id).newInstance();
 				snd.setDaemon(true);
 				snd.setName(snd.getTypeName() + "-SoundThread-" + id);
 				snd.loop = loop;
@@ -187,7 +186,7 @@ public class GameSound extends GameComponent {
 	}
 
 	public final boolean init() {
-		AudioFormat[] formats = new AudioFormat[] {
+		final AudioFormat[] formats = new AudioFormat[] {
 				new AudioFormat(44100.0f, 16, 2, true, false),
 				new AudioFormat(22050.0f, 16, 2, true, false),
 				new AudioFormat(11050.0f, 16, 2, true, false) };
