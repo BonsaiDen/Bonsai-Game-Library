@@ -73,7 +73,7 @@ public class Game extends Applet {
 
 	// Game Stuff
 	private boolean gameLoaded = false;
-	private boolean gameSound = false;
+	private boolean gameSound = true;
 	private boolean isRunning = true;
 	protected boolean paused = false;
 	private boolean focused = false;
@@ -105,6 +105,15 @@ public class Game extends Applet {
 	// Console
 	protected GameConsole console = null;
 	protected boolean consoleOpen = false;
+
+	// Builder
+	private boolean buildScaled = false;
+	private boolean buildSound = true;
+	private int buildSizex = 320;
+	private int buildSizey = 240;
+	private String buildTitle = "Bonsai";
+	private boolean buildInitMenu = false;
+	private boolean buildGameMenu = false;
 
 	/*
 	 * Path --------------------------------------------------------------------
@@ -146,28 +155,58 @@ public class Game extends Applet {
 	}
 
 	/*
-	 * GUI ---------------------------------------------------------------------
+	 * Builder Methods ---------------------------------------------------------
 	 */
-	public final void frame(final String title, final int sizex,
-			final int sizey, final boolean scaled, final boolean initMenu,
-			final boolean gameMenu) {
+	public final Game title(final String title) {
+		buildTitle = title;
+		return this;
+	}
 
+	public final Game size(final int width, final int height) {
+		buildSizex = width;
+		buildSizey = height;
+		return this;
+	}
+
+	public final Game scaled(final boolean scaled) {
+		buildScaled = scaled;
+		return this;
+	}
+
+	public final Game sound(final boolean sound) {
+		buildSound = sound;
+		return this;
+	}
+
+	public final Game menu(final boolean menu, final boolean def) {
+		buildInitMenu = menu;
+		buildGameMenu = def;
+		return this;
+	}
+
+	public final Game background(final Color color) {
+		backgroundColor = color;
+		return this;
+	}
+
+	public final void create() {
 		// Size
-		scale = scaled ? 2 : 1;
-		width = sizex;
-		height = sizey;
+		scale = buildScaled ? 2 : 1;
+		width = buildSizex;
+		height = buildSizey;
 
 		// Create frame
 		frame = new JFrame(config);
 		frame.setLayout(new BorderLayout(0, 0));
 
 		// Init Engine
+		gameSound = buildSound;
 		initEngine(frame);
 
 		// Setup frame
 		frame.setResizable(false);
-		frame.setTitle(title);
-		menu = new GameMenu(this, initMenu, gameMenu);
+		frame.setTitle(buildTitle);
+		menu = new GameMenu(this, buildInitMenu, buildGameMenu);
 		frame.addWindowListener(new FrameClose());
 		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		frame.setVisible(true);
@@ -175,10 +214,12 @@ public class Game extends Applet {
 
 		// Start threads
 		initThreads();
-		canvasPanel.requestFocus();
 	}
 
-	public void setSize(final int width, final int height) {
+	/*
+	 * General Methods ---------------------------------------------------------
+	 */
+	public final void setSize(final int width, final int height) {
 		this.width = width;
 		this.height = height;
 		background = image.create(width, height, false);
@@ -186,7 +227,7 @@ public class Game extends Applet {
 		setScale(1);
 	}
 
-	public void resizeFrame() {
+	private final void resizeFrame() {
 		frame.setSize((width * scale) + frame.getInsets().left
 				+ frame.getInsets().right, (height * scale)
 				+ frame.getInsets().top + frame.getInsets().bottom
@@ -215,8 +256,8 @@ public class Game extends Applet {
 	}
 
 	public static void main(final String args[]) {
-		new Game().frame("Bonsai Game Library 1.00", 320, 240, false, true,
-				true);
+		new Game().title("Bonsai Game Library 1.00").size(320, 240).menu(true,
+				true).create();
 	}
 
 	/*
@@ -229,28 +270,30 @@ public class Game extends Applet {
 			isRunning = true;
 		} else {
 			scale = getParameter("scaled") != null ? 2 : 1;
+			gameSound = getParameter("sound") != null ? getParameter("sound").equals(
+					"true")
+					: true;
 			width = getWidth() / scale;
 			height = getHeight() / scale;
 			initApplet(this);
 			setLayout(new BorderLayout(0, 0));
 			initEngine(this);
-			this.menu = new GameMenu(this, false, false);
+			menu = new GameMenu(this, false, false);
 			applet = this;
 			initThreads();
 			stopped = false;
 		}
-		canvasPanel.requestFocus();
 	}
 
 	@Override
-	public void paint(Graphics g) {
+	public final void paint(Graphics g) {
 		if (!gameLoaded) {
 			g.setColor(backgroundColor);
 			g.fillRect(0, 0, width() * scale, height() * scale);
 			g.dispose();
 		}
 	}
-	
+
 	@Override
 	public final void stop() {
 		stopped = true;
@@ -292,12 +335,15 @@ public class Game extends Applet {
 	 * Gameloader --------------------------------------------------------------
 	 */
 	private void initEngine(final Container parent) {
-		// we don't need double buffering here since we're already blitting all
-		// stuff to our own buffer for scaling before actually updating the 
+		// We don't need double buffering here since we're already blitting all
+		// stuff to our own buffer for scaling before actually updating the
 		// screen.
 		canvasPanel = new JPanel(false);
 		canvasPanel.setPreferredSize(new Dimension(width * scale, height
-			* scale));
+				* scale));
+		canvasPanel.setFocusable(false);
+		canvasPanel.setOpaque(true);
+		canvasPanel.setIgnoreRepaint(true);
 		parent.add(canvasPanel, 0);
 
 		// Components
@@ -310,12 +356,11 @@ public class Game extends Applet {
 		console = new GameConsole(this);
 
 		// Add input listeners
-		canvasPanel.addMouseListener(input);
-		canvasPanel.addMouseMotionListener(input);
-		canvasPanel.addKeyListener(input);
-		canvasPanel.addFocusListener(input);
-		canvasPanel.setIgnoreRepaint(true);
-
+		parent.addMouseListener(input);
+		parent.addMouseMotionListener(input);
+		parent.addKeyListener(input);
+		parent.addFocusListener(input);
+		
 		// Our background for scaling which also acts as a replacement for
 		// double buffering
 		background = image.create(width, height, false);
@@ -338,7 +383,9 @@ public class Game extends Applet {
 		public void run() {
 			// Init Loading
 			initGame(true);
-			gameSound = sound.init(); // This actually takes time!
+			if (gameSound) {
+				gameSound = sound.init(); // This actually takes time!
+			}
 			finishGame(false);
 			menu.enable(true);
 			gameLoaded = true;
@@ -356,12 +403,15 @@ public class Game extends Applet {
 		}
 	}
 
+	/*
+	 * Methods implemented by the game -----------------------------------------
+	 */
 	public void initGame(final boolean loaded) {
 	}
 
 	public void initApplet(final Applet applet) {
 	}
-	
+
 	public void updateGame(final boolean loaded) {
 	}
 
@@ -501,6 +551,10 @@ public class Game extends Applet {
 
 	public final BufferedImage getBackbuffer() {
 		return background;
+	}
+
+	public final JPanel getCanvas() {
+		return canvasPanel;
 	}
 
 	/*
