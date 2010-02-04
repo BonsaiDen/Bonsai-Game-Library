@@ -3,6 +3,17 @@ Bonsai Game Library
 
 A small Java based Library for creating 2D Games.
 
+Features of the Engine include:
+- Image loading tools
+- Sound loaders for wav/ogg
+- Support for Menus when run as a Application
+- Option to run at double screen size
+- Applet support
+- Support of saving game state as a file or in cookies when run in browser
+- Build in console(by default bound to Shift+F1 but can be changed to anything else like e.g. the Konami Code)
+
+When stripped down to a minimum the library is less than 30KB in size.
+
 
 Copyright (C) 2009-2010 Ivo Wetzel
 <http://code.google.com/p/bonsaigamelibrary/>
