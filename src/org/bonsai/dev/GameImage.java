@@ -22,6 +22,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 
 import java.io.IOException;
 import java.net.URL;
@@ -60,6 +61,16 @@ public class GameImage extends GameComponent {
 	public final BufferedImage create(final int width, final int height,
 			final boolean alpha) {
 		return game.getConfig().createCompatibleImage(width, height,
+				alpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE);
+	}
+	
+	public final VolatileImage createVolatile(final int width, final int height) {
+		return createVolatile(width, height, true);
+	}
+
+	public final VolatileImage createVolatile(final int width, final int height,
+			final boolean alpha) {
+		return game.getConfig().createCompatibleVolatileImage(width, height,
 				alpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE);
 	}
 
