@@ -1,7 +1,7 @@
 /**
  *	Version 1.00
  *	Copyright (C) 2009 Ivo Wetzel
- *	<http://code.google.com/p/bonsaigamelibrary/>
+ *	<http://github.com/BonsaiDen/Bonsai-Game-Library/>
  *
  *
  *  This file is part of the Bonsai Game Library.
@@ -32,9 +32,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
+import java.awt.RenderingHints;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -64,7 +65,7 @@ public class Game extends Applet {
 			.getDefaultConfiguration();
 
 	private JPanel canvasPanel;
-	private BufferedImage background;
+	private VolatileImage background;
 	private Graphics2D backgroundGraphics;
 	protected Color backgroundColor = Color.BLACK;
 	private int width;
@@ -222,7 +223,7 @@ public class Game extends Applet {
 	public final void setSize(final int width, final int height) {
 		this.width = width;
 		this.height = height;
-		background = image.create(width, height, false);
+		background = image.createVolatile(width, height, false);
 		backgroundGraphics = (Graphics2D) background.getGraphics();
 		setScale(1);
 	}
@@ -360,10 +361,10 @@ public class Game extends Applet {
 		parent.addMouseMotionListener(input);
 		parent.addKeyListener(input);
 		parent.addFocusListener(input);
-		
+
 		// Our background for scaling which also acts as a replacement for
 		// double buffering
-		background = image.create(width, height, false);
+		background = image.createVolatile(width, height, false);
 		setFPS(30);
 	}
 
@@ -549,7 +550,7 @@ public class Game extends Applet {
 		return config;
 	}
 
-	public final BufferedImage getBackbuffer() {
+	public final VolatileImage getBackbuffer() {
 		return background;
 	}
 
