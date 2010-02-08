@@ -277,9 +277,9 @@ public class Game extends Applet {
 			height = getHeight() / scale;
 			initApplet(this);
 			setLayout(new BorderLayout(0, 0));
+			applet = this;
 			initEngine(this);
 			menu = new GameMenu(this, false, false);
-			applet = this;
 			initThreads();
 			stopped = false;
 		}
@@ -341,7 +341,7 @@ public class Game extends Applet {
 		canvasPanel = new JPanel(false);
 		canvasPanel.setPreferredSize(new Dimension(width * scale, height
 				* scale));
-		canvasPanel.setFocusable(false);
+		canvasPanel.setFocusable((applet != null));
 		canvasPanel.setOpaque(true);
 		canvasPanel.setIgnoreRepaint(true);
 		parent.add(canvasPanel, 0);
@@ -356,10 +356,12 @@ public class Game extends Applet {
 		console = new GameConsole(this);
 
 		// Add input listeners
-		parent.addMouseListener(input);
-		parent.addMouseMotionListener(input);
-		parent.addKeyListener(input);
-		parent.addFocusListener(input);
+		Container c = applet != null ? canvasPanel : parent;
+		c.addMouseListener(input);
+		c.addMouseMotionListener(input);
+		c.addKeyListener(input);
+		c.addFocusListener(input);
+		c.requestFocus();
 
 		// Our background for scaling which also acts as a replacement for
 		// double buffering
