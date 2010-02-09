@@ -65,7 +65,6 @@ public class Game extends Applet {
 
 	private JPanel canvasPanel;
 	private VolatileImage background;
-	private Graphics2D backgroundGraphics;
 	protected Color backgroundColor = Color.BLACK;
 	private int width;
 	private int height;
@@ -223,7 +222,6 @@ public class Game extends Applet {
 		this.width = width;
 		this.height = height;
 		background = image.createVolatile(width, height, false);
-		backgroundGraphics = (Graphics2D) background.getGraphics();
 		setScale(1);
 	}
 
@@ -341,7 +339,7 @@ public class Game extends Applet {
 		canvasPanel = new JPanel(false);
 		canvasPanel.setPreferredSize(new Dimension(width * scale, height
 				* scale));
-		canvasPanel.setFocusable((applet != null));
+		canvasPanel.setFocusable(applet != null);
 		canvasPanel.setOpaque(true);
 		canvasPanel.setIgnoreRepaint(true);
 		parent.add(canvasPanel, 0);
@@ -440,7 +438,6 @@ public class Game extends Applet {
 			final long[] renderStatsMax = new long[10];
 
 			// Graphics
-			backgroundGraphics = (Graphics2D) background.getGraphics();
 			while (isRunning) {
 				// Pausing
 				if (!consoleOpen
@@ -467,17 +464,19 @@ public class Game extends Applet {
 				input.clearMouse();
 
 				// Render
-				Graphics2D bg = (Graphics2D) canvasPanel.getGraphics();
-				renderGame(gameLoaded, backgroundGraphics);
+				Graphics2D bg = (Graphics2D) background.getGraphics();
+				Graphics2D cbg = (Graphics2D) canvasPanel.getGraphics();
+				renderGame(gameLoaded, bg);
 				if (consoleOpen) {
-					console.draw(backgroundGraphics, 0, 0);
+					console.draw(bg, 0, 0);
 				}
 				if (scale != 1) {
-					bg.drawImage(background, 0, 0, width * scale, height
+					cbg.drawImage(background, 0, 0, width * scale, height
 							* scale, 0, 0, width, height, null);
 				} else {
-					bg.drawImage(background, 0, 0, null);
+					cbg.drawImage(background, 0, 0, null);
 				}
+				cbg.dispose();
 				bg.dispose();
 
 				// Limit FPS
