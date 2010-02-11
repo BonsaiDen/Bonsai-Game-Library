@@ -78,7 +78,7 @@ public class GameInput extends GameComponent implements MouseListener,
 		mouseY = e.getY();
 	}
 
-	public final void clearMouse() {
+	public final synchronized void clearMouse() {
 		mousePressed.clear();
 	}
 
@@ -96,6 +96,12 @@ public class GameInput extends GameComponent implements MouseListener,
 
 	public final void keyPressed(final KeyEvent e) {
 		int key = e.getKeyCode();
+
+		// Fix AutoKeyRepeat under X11
+		if (keysRemove.contains(key)) {
+			keysRemove.remove(Integer.valueOf(key));
+		}
+
 		if (!keysDown.contains(key)) {
 			keysDown.add(key);
 			keysPressed.add(key);
@@ -118,7 +124,7 @@ public class GameInput extends GameComponent implements MouseListener,
 		e.consume();
 	}
 
-	public final void clearKeys() {
+	public final synchronized void clearKeys() {
 		for (Integer key : keysRemove) {
 			keysDown.remove(Integer.valueOf(key));
 			if (keysPressed.contains(key)) {
