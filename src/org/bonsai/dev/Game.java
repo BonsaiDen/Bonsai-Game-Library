@@ -470,6 +470,13 @@ public class Game extends Applet {
 				if (consoleOpen) {
 					console.draw(bg, 0, 0);
 				}
+				
+				// Fix the backbuffer if it breaks
+				if (background.contentsLost()) {
+					background.validate(config);
+				}
+				
+				// Scale the buffer?
 				if (scale != 1) {
 					cbg.drawImage(background, 0, 0, width * scale, height
 							* scale, 0, 0, width, height, null);
