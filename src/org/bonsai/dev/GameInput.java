@@ -141,6 +141,7 @@ public class GameInput extends GameComponent implements MouseListener,
 		if (game.isPausedOnFocus()) {
 			game.pause(false);
 		}
+		game.focusElement.requestFocus();
 	}
 
 	public final void focusLost(final FocusEvent e) {

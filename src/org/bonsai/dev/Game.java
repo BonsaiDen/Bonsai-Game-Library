@@ -63,6 +63,7 @@ public class Game extends Applet {
 			.getDefaultScreenDevice()
 			.getDefaultConfiguration();
 
+	protected Container focusElement;
 	private JPanel canvasPanel;
 	private VolatileImage background;
 	protected Color backgroundColor = Color.BLACK;
@@ -90,7 +91,7 @@ public class Game extends Applet {
 
 	// GUI
 	private JFrame frame = null;
-	private Applet applet = null;
+	protected Applet applet = null;
 
 	// Classes
 	protected GameAnimation animation = null;
@@ -267,10 +268,11 @@ public class Game extends Applet {
 		if (stopped) {
 			isRunning = true;
 		} else {
-			scale = getParameter("scaled") != null ? 2 : 1;
-			gameSound = getParameter("sound") != null ? getParameter("sound").equals(
-					"true")
-					: true;
+			this.setFocusable(true);
+			scale = (getParameter("scaled") != null && getParameter("scaled").equals(
+					"true")) ? 2 : 1;
+			gameSound = getParameter("sound") != null
+					? getParameter("sound").equals("true") : true;
 			width = getWidth() / scale;
 			height = getHeight() / scale;
 			initApplet(this);
@@ -354,12 +356,12 @@ public class Game extends Applet {
 		console = new GameConsole(this);
 
 		// Add input listeners
-		Container c = applet != null ? canvasPanel : parent;
-		c.addMouseListener(input);
-		c.addMouseMotionListener(input);
-		c.addKeyListener(input);
-		c.addFocusListener(input);
-		c.requestFocus();
+		focusElement = applet != null ? canvasPanel : parent;
+		focusElement.addMouseListener(input);
+		focusElement.addMouseMotionListener(input);
+		focusElement.addKeyListener(input);
+		focusElement.addFocusListener(input);
+		focusElement.requestFocus();
 
 		// Our background for scaling which also acts as a replacement for
 		// double buffering
@@ -470,12 +472,12 @@ public class Game extends Applet {
 				if (consoleOpen) {
 					console.draw(bg, 0, 0);
 				}
-				
+
 				// Fix the backbuffer if it breaks
 				if (background.contentsLost()) {
 					background.validate(config);
 				}
-				
+
 				// Scale the buffer?
 				if (scale != 1) {
 					cbg.drawImage(background, 0, 0, width * scale, height
@@ -666,6 +668,8 @@ public class Game extends Applet {
 				JSObject doc = (JSObject) win.getMember("document");
 				String data = cookiename + "="
 						+ Base64.encodeBytes(stream.toByteArray())
+						// nobody will use this library in 10 years I guess
+						// so this is ok ;)
 						+ "; path=/; expires=Thu, 31-Dec-2019 12:00:00 GMT";
 
 				doc.setMember("cookie", data);
